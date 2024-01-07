@@ -75,7 +75,8 @@ public class AuthService extends ExceptionHandling {
     }
 
     public AuthenticationResponse auth(AuthRequest request){
-        var user = this.userRepo.findByEmail(request.getEmail()).orElseThrow();
+//        var user = this.userRepo.findByEmail(request.getEmail()).orElseThrow();
+        var user = this.userService.loadUserByUsername(request.getEmail());
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -85,7 +86,7 @@ public class AuthService extends ExceptionHandling {
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
-                .user(user)
+                .user((User) user)
                 .build();
     }
 

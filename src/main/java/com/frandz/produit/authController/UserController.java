@@ -22,4 +22,8 @@ public class UserController {
     public ResponseEntity<AuthenticationResponse> verifyEmail(@PathVariable("token") String token) throws InvalidTokenException, ExpiredTokenException {
         return ResponseEntity.ok(this.authService.validateToken(token));
     }
+    @PostMapping("/authentication")
+    public ResponseEntity<AuthenticationResponse> auth(@RequestBody AuthRequest authRequest){
+        return ResponseEntity.ok(this.authService.auth(authRequest));
+    }
 }
