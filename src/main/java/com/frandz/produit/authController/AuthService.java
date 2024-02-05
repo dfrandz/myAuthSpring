@@ -5,9 +5,11 @@ import com.frandz.produit.exception.EmailExistException;
 import com.frandz.produit.exception.ExceptionHandling;
 import com.frandz.produit.exception.ExpiredTokenException;
 import com.frandz.produit.exception.InvalidTokenException;
+import com.frandz.produit.model.Jwt;
 import com.frandz.produit.model.Role;
 import com.frandz.produit.model.User;
 import com.frandz.produit.model.VerificationToken;
+import com.frandz.produit.repository.JwtRepo;
 import com.frandz.produit.repository.UserRepo;
 import com.frandz.produit.repository.VerificationTokenRepo;
 import com.frandz.produit.service.EmailService;
@@ -15,6 +17,7 @@ import com.frandz.produit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +34,8 @@ public class AuthService extends ExceptionHandling {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+
+    private final JwtRepo jwtRepo;
 
     public AuthenticationResponse register(RegisterRequest request) throws EmailExistException {
         var user =this.userRepo.findByEmail(request.getEmail());
@@ -84,6 +89,13 @@ public class AuthService extends ExceptionHandling {
                 )
         );
         var jwtToken = jwtService.generateToken(user);
+        final Jwt jwt = Jwt.builder()
+                .valeur(jwtToken)
+                .desactive(false)
+                .expire(false)
+                .user((User) user)
+                .build();
+        this.jwtRepo.save(jwt);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .user((User) user)
@@ -99,5 +111,10 @@ public class AuthService extends ExceptionHandling {
         String emailBody ="Bonjour "+ "<h1>"+u.getName() +"</h1>" +
                 " Votre code de validation est "+"<h1>"+code+"</h1>";
         emailService.sendEmail(u.getEmail(), emailBody);
+    }
+
+    public void deconnexion(){
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        this.jwtService.deconnexion(user);
     }
 }

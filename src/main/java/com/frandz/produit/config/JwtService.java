@@ -1,11 +1,15 @@
 package com.frandz.produit.config;
 
 import com.frandz.produit.constant.SecurityConstant;
+import com.frandz.produit.model.Jwt;
+import com.frandz.produit.model.User;
+import com.frandz.produit.repository.JwtRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +19,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+
 @Service
+@AllArgsConstructor
 public class JwtService {
 
+    private final JwtRepo jwtRepo;
     private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
 
     public String extractUsername(String token) {
@@ -54,7 +61,7 @@ public class JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -74,5 +81,16 @@ public class JwtService {
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public Jwt tokenByValue(String value){
+        return this.jwtRepo.findByValeur(value).orElseThrow( () -> new RuntimeException("utilisateur introuvable"));
+    }
+
+    public void deconnexion(User user){
+      Jwt jwt = this.jwtRepo.findUserValidToken(user.getEmail(), false, false).orElseThrow(() -> new RuntimeException(" invalid Token"));
+      jwt.setDesactive(true);
+      jwt.setExpire(true);
+      this.jwtRepo.save(jwt);
     }
 }

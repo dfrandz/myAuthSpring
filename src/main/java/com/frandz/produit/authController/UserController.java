@@ -26,4 +26,9 @@ public class UserController {
     public ResponseEntity<AuthenticationResponse> auth(@RequestBody AuthRequest authRequest){
         return ResponseEntity.ok(this.authService.auth(authRequest));
     }
+
+    @PostMapping("/deconnexion")
+    public void deconnexion(){
+        this.authService.deconnexion();
+    }
 }
