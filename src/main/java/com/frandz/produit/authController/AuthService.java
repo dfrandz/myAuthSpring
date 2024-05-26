@@ -110,7 +110,7 @@ public class AuthService extends ExceptionHandling {
     public void sendEmailUser(User u, String code) {
         String emailBody ="Bonjour "+ "<h1>"+u.getName() +"</h1>" +
                 " Votre code de validation est "+"<h1>"+code+"</h1>";
-        emailService.sendEmail(u.getEmail(), emailBody);
+        this.emailService.sendEmail(u.getEmail(), emailBody);
     }
 
     public void deconnexion(){
