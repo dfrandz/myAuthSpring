@@ -3,13 +3,17 @@ package com.frandz.produit;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.FileSystemResource;
 
 @Configuration
 public class DotenvConfig{
     @Bean
-    public Dotenv dotenv() {
-        return Dotenv.configure()
-                .directory("./")  // Spécifiez le répertoire contenant le fichier .env
-                .load();
+    public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
+        configurer.setLocation(new FileSystemResource(".env"));
+        return configurer;
     }
+
+
 }
